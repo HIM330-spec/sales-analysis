@@ -1,7 +1,10 @@
 import os
 import pandas as pd
 from helper import calculate_total, format_currency
-from google import genai
+from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def load_sales_data(path: str) -> pd.DataFrame:
@@ -29,7 +32,7 @@ def save_outputs(df: pd.DataFrame, output_dir: str = "output") -> None:
     df.to_excel(f"{output_dir}/sales.xlsx", index=False)
     df.to_csv(f"{output_dir}/sales_cleaned.csv", index=False)
 
-    print(" Data saved in multiple formats:")
+    print("✅ Data saved in multiple formats:")
     print(f"- {output_dir}/sales.json")
     print(f"- {output_dir}/sales.xlsx")
     print(f"- {output_dir}/sales_cleaned.csv")
@@ -37,7 +40,7 @@ def save_outputs(df: pd.DataFrame, output_dir: str = "output") -> None:
 
 def calculate_totals(df: pd.DataFrame) -> pd.DataFrame:
     """Add calculated totals using helper functions."""
-    df["calculated_total"] = df.apply(
+    df["total"] = df.apply(
         lambda row: calculate_total(row["quantity"], row["price"]), axis=1
     )
     return df
@@ -45,29 +48,36 @@ def calculate_totals(df: pd.DataFrame) -> pd.DataFrame:
 
 def print_sales_summary(df: pd.DataFrame) -> None:
     """Print formatted sales summary and grand total."""
-    print("\n Sales Data:")
+    print("\n📊 Sales Data:")
     for _, row in df.iterrows():
-        formatted_total = format_currency(row["calculated_total"])
+        formatted_total = format_currency(row["total"])
         print(f"{row['product']}: {formatted_total}")
 
-    grand_total = df["calculated_total"].sum()
+    grand_total = df["total"].sum()
     formatted_grand_total = format_currency(grand_total)
-    print(f"\n Grand Total Sales: {formatted_grand_total}")
+    print(f"\n💰 Grand Total Sales: {formatted_grand_total}")
 
 
 def get_ai_insights(df: pd.DataFrame, grand_total: float) -> str:
-    """Generate AI-powered business insights using Gemini."""
-    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    """Generate AI-powered business insights using OpenAI."""
+    # Safety Check: If the dataframe is empty, return early
+    if df.empty:
+        return "⚠️ No data available to analyze. Please check your filters."
 
-    top_product = df.loc[df["calculated_total"].idxmax(), "product"]
-    low_product = df.loc[df["calculated_total"].idxmin(), "product"]
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+    # Now these lines won't crash
+    top_product = df.loc[df["total"].idxmax(), "product"]
+    low_product = df.loc[df["total"].idxmin(), "product"]
+
+    # ... rest of your code ...
 
     prompt = f"""
     Act as a Senior Business Consultant. Analyze these sales metrics:
     - Total Revenue: {grand_total}
     - Best Selling Item: {top_product}
     - Worst Performing Item: {low_product}
-    
+
     Provide 3 concise, actionable bullet points for the business owner:
     1. A prediction for next month based on the best seller.
     2. A strategic suggestion for the worst performer.
@@ -76,27 +86,29 @@ def get_ai_insights(df: pd.DataFrame, grand_total: float) -> str:
     """
 
     try:
-        response = client.models.generate_content(
-            model="gemini-1.5-flash", contents=prompt
+        response = client.chat.completions.create(  # fix 2: correct OpenAI syntax
+            model="gpt-4o-mini",
+            max_tokens=512,
+            messages=[{"role": "user", "content": prompt}],
         )
-        return response.text
+        return response.choices[0].message.content  # fix 3: correct response extraction
     except Exception as e:
-        return f" AI Insights unavailable: {e}"
+        return f"⚠️ AI Insights unavailable: {e}"
 
 
 # --- MAIN EXECUTION ---
 if __name__ == "__main__":
     try:
         df = load_sales_data("data/sales.csv")
-        df["total"] = df["quantity"] * df["price"]  # quick total
+        df["total"] = df["quantity"] * df["price"]
         save_outputs(df)
 
         df = calculate_totals(df)
         print_sales_summary(df)
 
-        grand_total = df["calculated_total"].sum()
+        grand_total = df["total"].sum()
         insights = get_ai_insights(df, grand_total)
-        print("\n AI Insights:\n", insights)
+        print("\n🤖 AI Insights:\n", insights)
 
     except Exception as e:
-        print(f" Error: {e}")
+        print(f"❌ Error: {e}")

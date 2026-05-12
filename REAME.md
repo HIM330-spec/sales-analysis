@@ -6,7 +6,7 @@ This is a professional data analysis tool built with Python. It takes raw sales 
 * **Language:** Python 3.x
 * **Frontend:** Streamlit (for the interactive dashboard)
 * **Data Handling:** Pandas
-* **AI Engine:**  OpenAI (Gpt-4o-mini)
+* **AI Engine:** Google GenAI (Gemini 3 Flash)
 * **Environment:** python-dotenv (for security)
 
 ## Features

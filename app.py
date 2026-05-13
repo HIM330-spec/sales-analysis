@@ -9,7 +9,7 @@ from analyzer import get_ai_insights
 
 # ── Page Config ───────────────────────────────────────────────────────────────
 st.set_page_config(page_title="Sales Intelligence", page_icon="🚀", layout="wide")
-st.title("🚀 Sales Intelligence Dashboard")
+st.title(" Sales Intelligence Dashboard")
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -100,7 +100,7 @@ def load_uploaded_file(uploaded_file) -> pd.DataFrame:
 
 
 # ── Sidebar: Data Source ──────────────────────────────────────────────────────
-st.sidebar.header("📂 Data Source")
+st.sidebar.header(" Data Source")
 source = st.sidebar.radio(
     "Choose data source:", ["Upload your own file", "Use sample data"], index=1
 )
@@ -114,7 +114,7 @@ if source == "Upload your own file":
     if uploaded:
         try:
             df_raw = load_uploaded_file(uploaded)
-            st.sidebar.success(f"✅ Loaded `{uploaded.name}`")
+            st.sidebar.success(f" Loaded `{uploaded.name}`")
         except Exception as e:
             st.sidebar.error(f"❌ {e}")
             st.stop()
@@ -130,7 +130,7 @@ else:
     if os.path.exists(data_path):
         df_raw = pd.read_csv(data_path)
     else:
-        st.error("❌ Sample data not found. Run `get_data.py` first or upload a file.")
+        st.error(" Sample data not found. Run `get_data.py` first or upload a file.")
         st.stop()
 
 
@@ -139,7 +139,7 @@ try:
     df = clean_dataframe(df_raw.copy())
     product_col, quantity_col, price_col = detect_columns(df)
 except ValueError as e:
-    st.error(f"❌ {e}")
+    st.error(f" {e}")
     st.stop()
 
 df["total"] = df[quantity_col] * df[price_col]
@@ -148,14 +148,14 @@ grand_total = df["total"].sum()
 
 # ── Metrics Row ───────────────────────────────────────────────────────────────
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("📦 Transactions", len(df))
-col2.metric("💰 Total Revenue", format_currency(grand_total))
-col3.metric("🏆 Best Seller", df.loc[df["total"].idxmax(), product_col])
-col4.metric("📉 Worst Performer", df.loc[df["total"].idxmin(), product_col])
+col1.metric(" Transactions", len(df))
+col2.metric(" Total Revenue", format_currency(grand_total))
+col3.metric(" Best Seller", df.loc[df["total"].idxmax(), product_col])
+col4.metric(" Worst Performer", df.loc[df["total"].idxmin(), product_col])
 
 
 # ── Sidebar: Filters ──────────────────────────────────────────────────────────
-st.sidebar.header("🔍 Filters")
+st.sidebar.header(" Filters")
 product_filter = st.sidebar.multiselect(
     "Filter by Product",
     options=df[product_col].unique(),
@@ -165,12 +165,12 @@ filtered_df = df[df[product_col].isin(product_filter)]
 
 
 # ── Data Table ────────────────────────────────────────────────────────────────
-st.subheader("📊 Sales Data")
+st.subheader(" Sales Data")
 st.dataframe(filtered_df, use_container_width=True)
 
 
 # ── Visualizations ────────────────────────────────────────────────────────────
-st.subheader("📈 Sales Performance")
+st.subheader(" Sales Performance")
 chart_type = st.radio("Choose Chart Type:", ["Bar", "Pie"], horizontal=True)
 
 grouped_df = (
@@ -204,22 +204,22 @@ else:
 
 # ── AI Insights ───────────────────────────────────────────────────────────────
 st.markdown("---")
-if st.button("✨ Generate AI Business Strategy"):
+if st.button(" Generate AI Business Strategy"):
     # CHECK: Is the filtered dataframe empty?
     if filtered_df.empty:
         st.warning(
-            "⚠️ Please select at least one product in the sidebar to generate insights."
+            " Please select at least one product in the sidebar to generate insights."
         )
     else:
         with st.spinner("Analyzing your data..."):
             insights = get_ai_insights(filtered_df, grand_total)
-            st.markdown("### 🤖 AI Executive Insights")
+            st.markdown(" AI Executive Insights")
             st.info(insights)
 
 
 # ── Download ──────────────────────────────────────────────────────────────────
 st.download_button(
-    label="⬇️ Download Cleaned CSV",
+    label="⬇ Download Cleaned CSV",
     data=filtered_df.to_csv(index=False),
     file_name="sales_cleaned.csv",
     mime="text/csv",

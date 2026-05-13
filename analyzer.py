@@ -32,7 +32,7 @@ def save_outputs(df: pd.DataFrame, output_dir: str = "output") -> None:
     df.to_excel(f"{output_dir}/sales.xlsx", index=False)
     df.to_csv(f"{output_dir}/sales_cleaned.csv", index=False)
 
-    print("✅ Data saved in multiple formats:")
+    print("Data saved in multiple formats:")
     print(f"- {output_dir}/sales.json")
     print(f"- {output_dir}/sales.xlsx")
     print(f"- {output_dir}/sales_cleaned.csv")
@@ -48,21 +48,21 @@ def calculate_totals(df: pd.DataFrame) -> pd.DataFrame:
 
 def print_sales_summary(df: pd.DataFrame) -> None:
     """Print formatted sales summary and grand total."""
-    print("\n📊 Sales Data:")
+    print("\nSales Data:")
     for _, row in df.iterrows():
         formatted_total = format_currency(row["total"])
         print(f"{row['product']}: {formatted_total}")
 
     grand_total = df["total"].sum()
     formatted_grand_total = format_currency(grand_total)
-    print(f"\n💰 Grand Total Sales: {formatted_grand_total}")
+    print(f"\n Grand Total Sales: {formatted_grand_total}")
 
 
 def get_ai_insights(df: pd.DataFrame, grand_total: float) -> str:
     """Generate AI-powered business insights using OpenAI."""
     # Safety Check: If the dataframe is empty, return early
     if df.empty:
-        return "⚠️ No data available to analyze. Please check your filters."
+        return " No data available to analyze. Please check your filters."
 
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -93,7 +93,7 @@ def get_ai_insights(df: pd.DataFrame, grand_total: float) -> str:
         )
         return response.choices[0].message.content  # fix 3: correct response extraction
     except Exception as e:
-        return f"⚠️ AI Insights unavailable: {e}"
+        return f" AI Insights unavailable: {e}"
 
 
 # --- MAIN EXECUTION ---
@@ -108,7 +108,7 @@ if __name__ == "__main__":
 
         grand_total = df["total"].sum()
         insights = get_ai_insights(df, grand_total)
-        print("\n🤖 AI Insights:\n", insights)
+        print("\n AI Insights:\n", insights)
 
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f" Error: {e}")

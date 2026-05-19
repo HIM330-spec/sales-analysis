@@ -17,7 +17,7 @@ def load_sales_data(path: str) -> pd.DataFrame:
     df = pd.read_csv(path)
     df.columns = df.columns.str.strip().str.lower()
 
-    required_cols = {"quantity", "price", "product"}
+    required_cols = {"Quantity", "Price", "Product"}
     if not required_cols.issubset(df.columns):
         raise ValueError(f"Missing required columns: {required_cols - set(df.columns)}")
 

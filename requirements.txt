@@ -1,5 +1,6 @@
-pandas
 streamlit
+pandas
+plotly
 openai
 python-dotenv
 openpyxl
